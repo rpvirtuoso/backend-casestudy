@@ -1,17 +1,17 @@
 from django.db import models
-from accounts.models import Account
+# from accounts.models import Account
 
 
 # Create your models here.
 
 
 class Customer(models.Model):
-    user = models.OneToOneField(Account, null=True, blank=True, on_delete=models.SET_NULL)
+    user = models.OneToOneField("accounts.Account", null=True, blank=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.user
 
 
 class Category(models.Model):
@@ -93,7 +93,7 @@ class CartItem(models.Model):
 
 class OrderItemTrue(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.OneToOneField(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1, blank=False, null=True)
     status_types = [
         ('SHI', 'Shipped'),

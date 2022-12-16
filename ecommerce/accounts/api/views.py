@@ -66,6 +66,7 @@ def account_list(request, format=None):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_profile(request, pk):
     try:
         account = Account.objects.get(pk=pk)
@@ -88,10 +89,11 @@ def update_profile(request):
         except Account.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         account.name = data['name']
+        account.phone = data['phone']
+        account.address = data['address']
         account.save()
-        # account.phone = body['phone']
-        # account.address = body['address']
-        context = {"account name": account.name}
+      
+        context = {"Result": account.name}
         return Response(context, status=status.HTTP_200_OK)
 
 

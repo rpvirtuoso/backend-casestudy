@@ -8,7 +8,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
-
+from product.models import Customer
 
 
 # Create your models here.
@@ -36,8 +36,8 @@ class MyAccountManger(BaseUserManager):
 class Account(AbstractBaseUser):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     name = models.CharField(max_length=30, unique=True)
-    phone = models.CharField(max_length=10, blank=True, null=True)
-    address = models.TextField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=14, blank=True, null=True)
+    address = models.TextField(max_length=500, blank=True, null=True)
     date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True)
     last_login = models.DateTimeField(verbose_name="last login", auto_now=True)
     is_admin = models.BooleanField(default=False)
@@ -70,11 +70,11 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
         print('Created using decorator')
 
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def create_customer(sender,instance=None,created=False,**kwargs):
-#     if created:
-#         Customer.objects.create(user=instance)
-#         print("Customer has been created using decorator")
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_customer(sender,instance=None,created=False,**kwargs):
+    if created:
+        Customer.objects.create(user=instance)
+        print("Customer has been created using decorator")
 
 # class BearerAuthentication(TokenAuthentication):
 #     """

@@ -122,6 +122,7 @@ def get_cart(request, userid):
     # return Response(serializer.data)
     try:
         customer = Customer.objects.get(user_id=userid)
+        print(customer.id)
     except Customer.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     try:
@@ -220,7 +221,8 @@ def change_quantity(request, userid, product_id):
     try:
         customer = Customer.objects.get(user_id=userid)
     except Customer.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        context = {"Result": "Customer ID not found"}
+        return Response(context,status=status.HTTP_404_NOT_FOUND)
     try:
         cart = Cart.objects.filter(customer_id=customer.id).get(complete=False)
     except Cart.DoesNotExist:
@@ -277,6 +279,7 @@ def create_order(requests, userid):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def order_history(requests, userid):
     try:
         customer = Customer.objects.get(user_id=userid)
@@ -284,15 +287,18 @@ def order_history(requests, userid):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     try:
-        cart = Cart.objects.filter(customer_id=customer.id).get(complete=True)
+        cart = Cart.objects.filter(customer_id=customer.id).filter(complete=True)
     except Cart.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    cart_id = cart.id
-    orders_set = Order.objects.filter(cart_id=cart_id).filter(status=True)
+    cart_id = []
+    cart_id = [cart_item.id for cart_item in cart]
+
+    orders_set = Order.objects.filter(cart__id__in=cart_id).filter(status=True)
     order_list = []
     for order in orders_set:
         order_item_list = []
-        context = {"orderId": order.id}
+        context = {"orderId": order.id,"date":order.date_ordered,"status":order.status}
+        # context={"date":order.date_ordered}
         order_items = OrderItemTrue.objects.filter(order_id=order.id)
         for order_item in order_items:
             # print(order_item.id)

@@ -6,7 +6,7 @@ from product.api.views import get_cart, get_cart_item, add_item_to_cart, remove_
 app_name = 'product'
 
 urlpatterns = [
-    path('<int:userid>/getCart/', get_cart, name="get-cart"),
+    path('<int:userid>/getCart', get_cart, name="get-cart"),
     path('<int:userid>/getCartItem/<int:cartitemId>', get_cart_item, name="get-cart-item"),
     path('<int:userid>/add/<int:product_id>', add_item_to_cart, name="add-cart-item"),
     path('<int:userid>/remove/<int:product_id>', remove_cart_item, name="remove-cart-item"),
