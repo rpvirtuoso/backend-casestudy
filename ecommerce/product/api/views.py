@@ -218,6 +218,9 @@ def add_item_to_cart(request, userid, product_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def change_quantity(request, userid, product_id):
+    if request.data['quantity']==0:
+        context={"Info":"No product added"}
+        return Response(context,status=status.HTTP_200_OK)
     try:
         customer = Customer.objects.get(user_id=userid)
     except Customer.DoesNotExist:
