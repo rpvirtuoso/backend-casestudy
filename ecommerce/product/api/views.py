@@ -5,15 +5,15 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import ProductSerializer, CustomerSerializer, CartSerializer, CartItemSerializer, \
-    OrderItemTrueSerializer
-from ..models import Product, Customer, Cart, CartItem, Order, OrderItemTrue
+from .serializers import ProductSerializer, CartItemSerializer, \
+    OrderItemTrueSerializer,CategorySerializer,SubCategorySerializer
+from ..models import Category, Product, Customer, Cart, CartItem, Order, OrderItemTrue, SubCategory
 
 
 @api_view(["POST"])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def add_product(request):
+    print('add product is being called')
     if request.user.is_admin:
         if request.method == 'POST':
             print(request.data)
@@ -27,22 +27,24 @@ def add_product(request):
         return Response(context, status=status.HTTP_403_FORBIDDEN)
 
 
-@api_view(["PUT"])
-@authentication_classes([TokenAuthentication])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def update_product(request):
     if request.user.is_admin:
-        if request.method == 'PUT':
+            print(request.data)
             pk = request.data["id"]
             try:
                 product = Product.objects.get(pk=pk)
             except Product.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             serializer = ProductSerializer(product, data=request.data)
+            print(f'serializer is :{serializer}')
             if serializer.is_valid():
+                print('serializer is valid')
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer._errors)
     else:
         context = {"ERROR": "You dont have required permission to update any product(s)"}
         return Response(context, status=status.HTTP_403_FORBIDDEN)
@@ -61,12 +63,35 @@ def product_detail(request, pk):
 
 @api_view(["GET"])
 def product_list(request):
+    print("function called")
     products=Product.objects.all()
     serializer=ProductSerializer(products,many=True)
     return Response(serializer.data)
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def category_list(request):
+        print("function called")
+        categories=Category.objects.all()
+        serializer=CategorySerializer(categories,many=True)
+        print(serializer.data)
+        return Response(serializer.data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def sub_category_list(request):
+        print(request.data)
+        id=Category.objects.get(name=request.data['category'])
+
+        sub_categories=SubCategory.objects.filter(category=id)
+        serializer=SubCategorySerializer(sub_categories,many=True)
+        context={}
+        return Response(serializer.data)
+
+@api_view(["GET"])
 def filter_by_category(request, category):
+    print('filter_by_category is being called')
     try:
         product = Product.objects.filter(category=category)
     except Product.DoesNotExist:
@@ -236,6 +261,7 @@ def change_quantity(request, userid, product_id):
         # cart_item = CartItem.objects.filter(cart_id=cart_id).get(id=cartItemId)
         cart_item = CartItem.objects.filter(cart_id=cart_id).get(product_id=product_id)
         cart_item.quantity = request.data["quantity"]
+        print(request.data)
         cart_item.save()
     except CartItem.DoesNotExist:
         cart_item = CartItem(product_id=product_id, quantity=request.data["quantity"], cart_id=cart_id)
@@ -310,3 +336,4 @@ def order_history(requests, userid):
         context["products"] = order_item_list
         order_list.append(context)
     return Response(order_list)
+

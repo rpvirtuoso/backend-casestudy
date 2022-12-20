@@ -11,6 +11,8 @@ urlpatterns = [
     path('logout', views.logout_user, name="logout"),
     path('getprofile/<int:pk>', views.get_profile, name="getprofile"),
     path('updateprofile', views.update_profile, name="update-profile"),
+    path('checkAdmin', views.check_admin, name="checkAdmin"),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

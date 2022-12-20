@@ -111,3 +111,13 @@ def logout_user(request):
     context={"userId": account.id}
     return Response(context,status=status.HTTP_200_OK)
 
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def check_admin(request):
+    if request.user.is_admin:
+        context = {"Info": "You are an admin"}
+        return Response(context,status=status.HTTP_200_OK)
+    else:
+        context = {"ERROR": "You are not an admin"}
+        return Response(context, status=status.HTTP_403_FORBIDDEN)
