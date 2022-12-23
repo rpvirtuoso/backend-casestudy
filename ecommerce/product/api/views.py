@@ -107,18 +107,18 @@ def filtered_products(request, category):
     except Product.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     try:
-        p = request.data["price"]
-        product_by_price = product.filter(price__lte=p)
-        try:
-            s = request.data["subcategory"]
-        except KeyError:
-            print("Key Error , 'subcategory' key doesnt exist")
+        p = request.data["MinPrice"]
+        product_by_price = product.filter(price__gte=p)
+    #     try:
+    #         s = request.data["subcategory"]
+    #     except KeyError:
+    #         print("Key Error , 'subcategory' key doesnt exist")
 
     except KeyError:
         print("Key Error , 'price' Key doesn't exist")
 
-    final = product_by_price.filter(subcategory=s)
-    serializer = ProductSerializer(final, many=True)
+    # final = product_by_price.filter(subcategory=s)
+    serializer = ProductSerializer(product_by_price, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
